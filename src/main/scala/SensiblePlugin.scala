@@ -119,6 +119,8 @@ object SensiblePlugin extends AutoPlugin {
         if (sys.env.contains("CI")) Seq("-Werror")
         else Nil
       },
+    // some of those flags are not supported in doc
+    javacOptions in doc ~= (_.filterNot(_.startsWith("-Xlint"))),
 
     javaOptions ++= JavaSpecificFlags ++ Seq("-Xss2m", "-Dfile.encoding=UTF8"),
 
