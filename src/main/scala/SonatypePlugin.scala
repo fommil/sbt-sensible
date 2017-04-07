@@ -108,11 +108,7 @@ object SonatypeKeys {
    *
    * At least one license must exist in the standard sbt `licenses`
    * setting. The contents of the URL should be present in a LICENSE
-   * file on the repo and also in the resources directory of each
-   * module (a symbolic link is enough to ensure this). Project owners
-   * should also seriously consider including a NOTICE file in the
-   * root of the project (and resource directories) containing a list
-   * of contributors that must retain attribution rights.
+   * file on the repo.
    *
    * Listed in decreasing order of copyleft.
    *
