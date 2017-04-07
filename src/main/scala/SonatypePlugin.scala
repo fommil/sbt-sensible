@@ -15,20 +15,17 @@ import sbt.Keys._
  * is published on github.
  *
  * If the version string contains "SNAPSHOT", it goes to snapshots,
- * otherwise to staging. Staged releases require a manual login to
- * oss.sonatype.org followed by
- *
- * 1. Repository
- * 2. Close
- * 3. (wait for it)
- * 4. Release
+ * otherwise to staging.
  *
  * The environment variables `SONATYPE_USERNAME` and
- * `SONATYPE_PASSWORD` will be read for credentials.
+ * `SONATYPE_PASSWORD` will be read for credentials if there is no
+ * `~/.m2/credentials` file.
  *
  * Snapshot releases can be made using `sbt publish` but staged
  * releases must be made with `sbt publishSigned` (and may require the
  * user to provide their GPG credentials manually).
+ *
+ * Staged releases should be followed by `sonatypeRelease`.
  *
  * Note that this will automatically set the sbt-header settings to
  * sensible defaults if it is enabled. We do not enable it
