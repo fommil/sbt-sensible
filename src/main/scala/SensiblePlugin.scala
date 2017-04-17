@@ -127,6 +127,18 @@ object SensiblePlugin extends AutoPlugin {
     // must be project-level because of crazy ivy...
     libraryDependencies ++= sensibleTestLibs(Test),
 
+    excludeDependencies ++= Seq(
+      // we don't want another https://issues.apache.org/jira/browse/CASSANDRA-10984
+      SbtExclusionRule("io.netty", "netty-all"),
+      // clean up the mess made by anybody who doesn't use slf4j...
+      SbtExclusionRule("org.apache.logging.log4j", "log4j-api"),
+      SbtExclusionRule("log4j", "log4j"),
+      SbtExclusionRule("commons-logging", "commons-logging"),
+      SbtExclusionRule("org.slf4j", "slf4j-log4j12"),
+      SbtExclusionRule("org.slf4j", "slf4j-jdk14"),
+      SbtExclusionRule("org.slf4j", "slf4j-jcl.jar")
+    ),
+
     dependencyOverrides ++= Set(
       // scala-lang is always used during transitive ivy resolution (and potentially thrown out...)
       "org.scala-lang" % "scala-compiler" % scalaVersion.value,
@@ -206,12 +218,13 @@ object SensibleSettings {
     testFrameworks := Seq(TestFrameworks.ScalaTest, TestFrameworks.JUnit)
   )
 
-  private val logbackVersion = "1.7.25"
+  private val slf4jVersion = "1.7.25"
   val logback = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.2.2",
-    "org.slf4j" % "slf4j-api" % logbackVersion,
-    "org.slf4j" % "jul-to-slf4j" % logbackVersion,
-    "org.slf4j" % "jcl-over-slf4j" % logbackVersion
+    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "org.slf4j" % "slf4j-api" % slf4jVersion,
+    "org.slf4j" % "jul-to-slf4j" % slf4jVersion,
+    "org.slf4j" % "jcl-over-slf4j" % slf4jVersion,
+    "org.slf4j" % "log4j-over-slf4j" % slf4jVersion
   )
 
   // used for unique gclog naming
