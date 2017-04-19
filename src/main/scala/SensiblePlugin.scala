@@ -168,7 +168,7 @@ object SensibleSettings {
   def sensibleTestLibs(config: Configuration) = Seq(
     // janino 3.0.6 is not compatible and causes http://www.slf4j.org/codes.html#replay
     "org.codehaus.janino" % "janino" % "2.7.8" % config,
-    "org.scalatest" %% "scalatest" % "3.0.1" % config
+    "org.scalatest" %% "scalatest" % "3.0.2" % config
   ) ++ logback.map(_ % config)
 
   // WORKAROUND https://github.com/sbt/sbt/issues/2534
