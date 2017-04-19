@@ -121,6 +121,7 @@ object SensiblePlugin extends AutoPlugin {
       },
     // some of those flags are not supported in doc
     javacOptions in doc ~= (_.filterNot(_.startsWith("-Xlint"))),
+    javacOptions in doc ~= (_.filterNot(_.startsWith("-Werror"))),
 
     javaOptions ++= JavaSpecificFlags ++ Seq("-Xss2m", "-Dfile.encoding=UTF8"),
 
