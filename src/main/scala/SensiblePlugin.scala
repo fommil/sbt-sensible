@@ -39,7 +39,7 @@ object SensiblePlugin extends AutoPlugin {
     version := {
       val v = version.value
       if (!v.contains("+")) v
-      else v + "-SNAPSHOT"
+      else v.replaceAll("-alpha0.*", "") + "-SNAPSHOT"
     },
 
     concurrentRestrictions := {
