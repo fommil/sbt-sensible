@@ -42,6 +42,8 @@ object SensiblePlugin extends AutoPlugin {
       else v.replaceAll("-alpha0.*", "") + "-SNAPSHOT"
     },
 
+    isSnapshot := version.value.contains("SNAP"),
+
     concurrentRestrictions := {
       val limited = Properties.envOrElse("SBT_TASK_LIMIT", "4").toInt
       Seq(Tags.limitAll(limited))

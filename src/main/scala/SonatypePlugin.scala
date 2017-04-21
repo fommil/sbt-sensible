@@ -66,7 +66,7 @@ object SonatypePlugin extends AutoPlugin {
     publishTo := {
       assert(licenses.value.nonEmpty, "licenses cannot be empty or maven central will reject publication")
       val nexus = "https://oss.sonatype.org/"
-      if (isSnapshot.value || version.value.contains("SNAP"))
+      if (isSnapshot.value)
         Some("snapshots" at nexus + "content/repositories/snapshots")
       else
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
