@@ -115,6 +115,10 @@ object SensiblePlugin extends AutoPlugin {
         else Nil
       },
 
+    scalacOptions in console in Compile ~= { opts =>
+      opts.filterNot { flag => flag.startsWith("-Ywarn") || flag.startsWith("-Xlint") }
+    },
+
     javacOptions ++= Seq(
       "-Xlint:all", "-Xlint:-options", "-Xlint:-path", "-Xlint:-processing"
     ) ++ {
@@ -177,6 +181,10 @@ object SensibleSettings {
   // don't forget to also call testLibs
   def sensibleTestSettings = sensibleCrossPath ++ Seq(
     parallelExecution := true,
+
+    scalacOptions in console ~= { opts =>
+      opts.filterNot { flag => flag.startsWith("-Ywarn") || flag.startsWith("-Xlint") }
+    },
 
     javaOptions ~= (_.filterNot(_.startsWith("-Dlogback.configurationFile"))),
     javaOptions += s"-Dlogback.configurationFile=${(baseDirectory in ThisBuild).value}/logback-${configuration.value}.xml",
