@@ -134,17 +134,21 @@ object SensiblePlugin extends AutoPlugin {
     // must be project-level because of crazy ivy...
     libraryDependencies ++= sensibleTestLibs(Test),
 
-    excludeDependencies ++= Seq(
-      // we don't want another https://issues.apache.org/jira/browse/CASSANDRA-10984
-      SbtExclusionRule("io.netty", "netty-all"),
-      // clean up the mess made by anybody who doesn't use slf4j...
-      SbtExclusionRule("org.apache.logging.log4j", "log4j-api"),
-      SbtExclusionRule("log4j", "log4j"),
-      SbtExclusionRule("commons-logging", "commons-logging"),
-      SbtExclusionRule("org.slf4j", "slf4j-log4j12"),
-      SbtExclusionRule("org.slf4j", "slf4j-jdk14"),
-      SbtExclusionRule("org.slf4j", "slf4j-jcl.jar")
-    ),
+    excludeDependencies ++= {
+      // plugins tend to have an intricate network of dependencies...
+      if (sbtPlugin.value) Nil
+      else Seq(
+        // we don't want another https://issues.apache.org/jira/browse/CASSANDRA-10984
+        SbtExclusionRule("io.netty", "netty-all"),
+        // clean up the mess made by anybody who doesn't use slf4j...
+        SbtExclusionRule("org.apache.logging.log4j", "log4j-api"),
+        SbtExclusionRule("log4j", "log4j"),
+        SbtExclusionRule("commons-logging", "commons-logging"),
+        SbtExclusionRule("org.slf4j", "slf4j-log4j12"),
+        SbtExclusionRule("org.slf4j", "slf4j-jdk14"),
+        SbtExclusionRule("org.slf4j", "slf4j-jcl.jar")
+      )
+    },
 
     dependencyOverrides ++= Set(
       // user may have a different scala provider...
