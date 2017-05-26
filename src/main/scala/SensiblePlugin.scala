@@ -96,17 +96,18 @@ object SensiblePlugin extends AutoPlugin {
       "-encoding", "UTF-8",
       "-feature",
       "-deprecation",
-      "-language:postfixOps",
-      "-language:implicitConversions",
-      "-Xlint",
+      "-Xfuture",
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
-      "-Xfuture"
+      "-Ywarn-value-discard",
+      "-Ywarn-nullary-unit",
+      "-Ywarn-numeric-widen",
+      "-Ywarn-inaccessible"
     ) ++ {
         CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, 12)) => Seq("-Ywarn-unused-import")
-          case Some((2, 11)) => Seq("-Yinline-warnings", "-Ywarn-unused-import")
-          case Some((2, 10)) => Seq("-Yinline-warnings")
+          case Some((2, 12)) => Seq("-Xlint:-unused,_", "-Ywarn-unused:implicits,imports,-locals,-params,-patvars,-privates")
+          case Some((2, 11)) => Seq("-Xlint", "-Yinline-warnings", "-Ywarn-unused-import")
+          case Some((2, 10)) => Seq("-Xlint", "-Yinline-warnings")
           case _             => Nil
         }
       } ++ {
