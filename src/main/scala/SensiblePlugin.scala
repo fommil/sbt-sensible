@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong
 
 import scala.util.Properties
 
-import com.typesafe.sbt.SbtScalariform._
 import scalariform.formatter.preferences._
 import sbt._
 import sbt.IO._
@@ -50,7 +49,12 @@ object SensiblePlugin extends AutoPlugin {
     }
   )
 
-  override val projectSettings = scalariformSettings ++ Seq(
+  // exploiting a single namespace to workaround https://github.com/ensime/ensime-sbt/issues/148
+  private val scalariformPreferences = settingKey[IFormattingPreferences](
+    "Scalariform formatting preferences, e.g. indentation"
+  )
+
+  override val projectSettings = Seq(
     ivyLoggingLevel := UpdateLogging.Quiet,
     conflictManager := ConflictManager.strict,
 
@@ -74,7 +78,7 @@ object SensiblePlugin extends AutoPlugin {
     javaOptions += s"-Dsbt.sensible.name=${name.value}",
     javaOptions in Compile += s"-Dlogback.configurationFile=${(baseDirectory in ThisBuild).value}/logback-main.xml",
 
-    ScalariformKeys.preferences := FormattingPreferences().setPreference(AlignSingleLineCaseStatements, true),
+    scalariformPreferences := FormattingPreferences().setPreference(AlignSingleLineCaseStatements, true),
 
     resources in Compile ++= {
       // automatically adds legal information to jars, but are
