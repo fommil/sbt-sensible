@@ -96,6 +96,9 @@ object SensiblePlugin extends AutoPlugin {
       Seq(fileWithFallback("LICENSE"), fileWithFallback("NOTICE"))
     },
 
+    // not great with scalatest, so only use in Compile
+    scalacOptions in Compile += "-Ywarn-value-discard",
+
     scalacOptions ++= Seq(
       "-encoding", "UTF-8",
       "-feature",
@@ -103,7 +106,6 @@ object SensiblePlugin extends AutoPlugin {
       "-Xfuture",
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
-      "-Ywarn-value-discard",
       "-Ywarn-nullary-unit",
       "-Ywarn-numeric-widen",
       "-Ywarn-inaccessible"
