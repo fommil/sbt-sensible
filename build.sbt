@@ -6,9 +6,6 @@ sbtPlugin := true
 sonatypeGithub := ("fommil", "sbt-sensible")
 licenses := Seq(Apache2)
 
-// intentionally not depending on the plugin, to allow scalafmt
-libraryDependencies += "org.scalariform" %% "scalariform" % "0.1.8"
-
 addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC10")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.1")
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "1.2.0")
