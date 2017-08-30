@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 import scala.util.Properties
 
+import sbtdynver.DynVerPlugin.autoImport._
 import scalariform.formatter.preferences._
 import sbt._
 import sbt.IO._
@@ -34,11 +35,17 @@ object SensiblePlugin extends AutoPlugin {
 
     javaOptions += s"-Dsbt.sensible.root=${(baseDirectory in ThisBuild).value.getCanonicalFile}",
 
-    // WORKAROUND https://github.com/dwijnand/sbt-dynver/issues/23
     version := {
-      val v = version.value
-      if (!v.contains("+")) v
-      else v.replaceAll("-alpha0.*", "") + "-SNAPSHOT"
+      val dyn = dynverGitDescribeOutput.value.version(dynverCurrentDate.value)
+      val isSnapshot = dynverGitDescribeOutput.value.isSnapshot
+      if (!isSnapshot) dyn
+      else {
+        val SemVer = "(\\d+)[.](\\d+)[.](\\d+)".r
+        dyn.replaceAll("-alpha0.*", "").replaceAll("[+].*", "") match {
+          case SemVer(major, minor, patch) => s"$major.$minor.${patch.toInt + 1}-SNAPSHOT"
+          case other                       => s"$other-SNAPSHOT"
+        }
+      }
     },
 
     isSnapshot := version.value.contains("SNAP"),
