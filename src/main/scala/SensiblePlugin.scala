@@ -42,7 +42,7 @@ object SensiblePlugin extends AutoPlugin {
         val SemVer = "(\\d+)[.](\\d+)[.](\\d+)".r
         dyn.replaceAll("-alpha0.*", "").replaceAll("[+].*", "") match {
           case SemVer(major, minor, patch) => s"$major.$minor.${patch.toInt + 1}-SNAPSHOT"
-          case other                       => s"$other-SNAPSHOT"
+          case other                       => "0.0.1-SNAPSHOT"
         }
       }
     },
