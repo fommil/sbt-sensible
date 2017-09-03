@@ -40,7 +40,9 @@ object SensiblePlugin extends AutoPlugin {
       if (!isSnapshot) dyn
       else {
         val SemVer = "(\\d+)[.](\\d+)[.](\\d+)".r
-        dyn.replaceAll("-alpha0.*", "").replaceAll("[+].*", "") match {
+        val NewVer = "(\\d+)[.](\\d+)[.](\\d+)-alpha0".r
+        dyn.replaceAll("[+].*", "") match {
+          case NewVer(major, minor, patch) => s"$major.$minor.$patch-SNAPSHOT"
           case SemVer(major, minor, patch) => s"$major.$minor.${patch.toInt + 1}-SNAPSHOT"
           case other                       => "0.0.1-SNAPSHOT"
         }
