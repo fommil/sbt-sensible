@@ -16,26 +16,25 @@ import sbt.Keys._
  */
 object SensiblePlugin extends AutoPlugin {
   override def requires = sbtdynver.DynVerPlugin
-  override def trigger = allRequirements
+  override def trigger  = allRequirements
 
   val autoImport = SensibleSettings
   import autoImport._
 
-  private val JavaSpecificFlags = sys.props("java.version").substring(0, 3) match {
-    case "1.6" | "1.7" => List("-XX:MaxPermSize=256m")
-    case _             => List("-XX:MaxMetaspaceSize=256m")
-  }
+  private val JavaSpecificFlags =
+    sys.props("java.version").substring(0, 3) match {
+      case "1.6" | "1.7" => List("-XX:MaxPermSize=256m")
+      case _             => List("-XX:MaxMetaspaceSize=256m")
+    }
 
   override val buildSettings = Seq(
     maxErrors := 1,
     fork := true,
     cancelable := true,
     sourcesInBase := false,
-
     javaOptions += s"-Dsbt.sensible.root=${(baseDirectory in ThisBuild).value.getCanonicalFile}",
-
     version := {
-      val dyn = dynverGitDescribeOutput.value.version(dynverCurrentDate.value)
+      val dyn        = dynverGitDescribeOutput.value.version(dynverCurrentDate.value)
       val isSnapshot = dynverGitDescribeOutput.value.isSnapshot
       if (!isSnapshot) dyn
       else {
@@ -43,14 +42,13 @@ object SensiblePlugin extends AutoPlugin {
         val NewVer = "(\\d+)[.](\\d+)[.](\\d+)-alpha0".r
         dyn.replaceAll("[+].*", "") match {
           case NewVer(major, minor, patch) => s"$major.$minor.$patch-SNAPSHOT"
-          case SemVer(major, minor, patch) => s"$major.$minor.${patch.toInt + 1}-SNAPSHOT"
-          case other                       => "0.0.1-SNAPSHOT"
+          case SemVer(major, minor, patch) =>
+            s"$major.$minor.${patch.toInt + 1}-SNAPSHOT"
+          case other => "0.0.1-SNAPSHOT"
         }
       }
     },
-
     isSnapshot := version.value.contains("SNAP"),
-
     concurrentRestrictions := {
       val limited = Properties.envOrElse("SBT_TASK_LIMIT", "4").toInt
       Seq(Tags.limitAll(limited))
@@ -60,12 +58,12 @@ object SensiblePlugin extends AutoPlugin {
   override val projectSettings = Seq(
     ivyLoggingLevel := UpdateLogging.Quiet,
     conflictManager := ConflictManager.strict,
-
     // makes it really easy to use a RAM disk
     target := {
       sys.env.get("SBT_VOLATILE_TARGET") match {
-        case None       => target.value
-        case Some(base) => file(base) / target.value.getCanonicalPath.replace(':', '_')
+        case None => target.value
+        case Some(base) =>
+          file(base) / target.value.getCanonicalPath.replace(':', '_')
       }
     },
     javaOptions ++= {
@@ -77,10 +75,8 @@ object SensiblePlugin extends AutoPlugin {
           s"-Djava.io.tmpdir=$tmpdir" :: Nil
       }
     },
-
     javaOptions += s"-Dsbt.sensible.name=${name.value}",
     javaOptions in Compile += s"-Dlogback.configurationFile=${(baseDirectory in ThisBuild).value}/logback-main.xml",
-
     resources in Compile ++= {
       // automatically adds legal information to jars, but are
       // lower-cased https://github.com/fommil/sbt-sensible/issues/5
@@ -88,20 +84,18 @@ object SensiblePlugin extends AutoPlugin {
       val base = baseDirectory.value
       val root = (baseDirectory in ThisBuild).value
 
-      def fileWithFallback(name: String): File = {
+      def fileWithFallback(name: String): File =
         if ((base / name).exists) base / name
         else if ((root / name).exists) root / name
         else throw new IllegalArgumentException(s"legal file $name must exist")
-      }
 
       Seq(fileWithFallback("LICENSE"), fileWithFallback("NOTICE"))
     },
-
     // not great with scalatest, so only use in Compile
     scalacOptions in Compile += "-Ywarn-value-discard",
-
     scalacOptions ++= Seq(
-      "-encoding", "UTF-8",
+      "-encoding",
+      "UTF-8",
       "-feature",
       "-deprecation",
       "-Xfuture",
@@ -111,113 +105,126 @@ object SensiblePlugin extends AutoPlugin {
       "-Ywarn-numeric-widen",
       "-Ywarn-inaccessible"
     ) ++ {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, 12)) => Seq("-Xlint:-unused,_", "-Ywarn-unused:implicits,imports,-locals,-params,-patvars,-privates")
-          case Some((2, 11)) => Seq("-Xlint", "-Yinline-warnings", "-Ywarn-unused-import")
-          case Some((2, 10)) => Seq("-Xlint", "-Yinline-warnings")
-          case _             => Nil
-        }
-      } ++ {
-        // fatal warnings can get in the way during the DEV cycle
-        if (sys.env.contains("CI")) Seq("-Xfatal-warnings")
-        else Nil
-      },
-
-    scalacOptions in console in Compile ~= { opts =>
-      opts.filterNot { flag => flag.startsWith("-Ywarn") || flag.startsWith("-Xlint") }
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 12)) =>
+          Seq(
+            "-Xlint:-unused,_",
+            "-Ywarn-unused:implicits,imports,-locals,-params,-patvars,-privates"
+          )
+        case Some((2, 11)) =>
+          Seq("-Xlint", "-Yinline-warnings", "-Ywarn-unused-import")
+        case Some((2, 10)) => Seq("-Xlint", "-Yinline-warnings")
+        case _             => Nil
+      }
+    } ++ {
+      // fatal warnings can get in the way during the DEV cycle
+      if (sys.env.contains("CI")) Seq("-Xfatal-warnings")
+      else Nil
     },
-
+    scalacOptions in console in Compile ~= { opts =>
+      opts.filterNot { flag =>
+        flag.startsWith("-Ywarn") || flag.startsWith("-Xlint")
+      }
+    },
     javacOptions ++= Seq(
-      "-Xlint:all", "-Xlint:-options", "-Xlint:-path", "-Xlint:-processing"
+      "-Xlint:all",
+      "-Xlint:-options",
+      "-Xlint:-path",
+      "-Xlint:-processing"
     ) ++ {
-        if (sys.env.contains("CI")) Seq("-Werror")
-        else Nil
-      },
+      if (sys.env.contains("CI")) Seq("-Werror")
+      else Nil
+    },
     // some of those flags are not supported in doc
     javacOptions in doc ~= (_.filterNot(_.startsWith("-Xlint"))),
     javacOptions in doc ~= (_.filterNot(_.startsWith("-Werror"))),
-
     javaOptions ++= JavaSpecificFlags ++ Seq("-Xss2m", "-Dfile.encoding=UTF8"),
-
     // must be project-level because of crazy ivy...
     libraryDependencies ++= sensibleTestLibs(Test),
-
     excludeDependencies ++= {
       // plugins tend to have an intricate network of dependencies...
       if (sbtPlugin.value) Nil
-      else Seq(
-        // we don't want another https://issues.apache.org/jira/browse/CASSANDRA-10984
-        SbtExclusionRule("io.netty", "netty-all"),
-        // clean up the mess made by everybody who doesn't use slf4j...
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.10"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-liquibase"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-jul"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-iostreams"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-nosql"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-bom"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-osgi"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.11"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-jmx-gui"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-taglib"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-web"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-flume-ng"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-jcl"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-to-slf4j"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-1.2-api"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-core-its"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-core"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j-api"),
-        SbtExclusionRule("org.apache.logging.log4j", "log4j"),
-        SbtExclusionRule("log4j", "apache-log4j-extras"),
-        SbtExclusionRule("log4j", "log4j"),
-        SbtExclusionRule("commons-logging", "commons-logging"),
-        SbtExclusionRule("commons-logging", "commons-logging-api"),
-        SbtExclusionRule("commons-logging", "commons-logging-adapters"),
-        SbtExclusionRule("org.slf4j", "slf4j-log4j12"),
-        SbtExclusionRule("org.slf4j", "slf4j-jdk14"),
-        SbtExclusionRule("org.slf4j", "slf4j-jcl.jar")
-      )
+      else
+        Seq(
+          // we don't want another https://issues.apache.org/jira/browse/CASSANDRA-10984
+          SbtExclusionRule("io.netty", "netty-all"),
+          // clean up the mess made by everybody who doesn't use slf4j...
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.10"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-liquibase"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-jul"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-iostreams"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-nosql"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-bom"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-osgi"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.11"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-jmx-gui"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-taglib"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-web"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-flume-ng"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-jcl"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-to-slf4j"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-1.2-api"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-core-its"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-core"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j-api"),
+          SbtExclusionRule("org.apache.logging.log4j", "log4j"),
+          SbtExclusionRule("log4j", "apache-log4j-extras"),
+          SbtExclusionRule("log4j", "log4j"),
+          SbtExclusionRule("commons-logging", "commons-logging"),
+          SbtExclusionRule("commons-logging", "commons-logging-api"),
+          SbtExclusionRule("commons-logging", "commons-logging-adapters"),
+          SbtExclusionRule("org.slf4j", "slf4j-log4j12"),
+          SbtExclusionRule("org.slf4j", "slf4j-jdk14"),
+          SbtExclusionRule("org.slf4j", "slf4j-jcl.jar")
+        )
     },
-
     dependencyOverrides ++= Set(
       // user may have a different scala provider...
       scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-      scalaOrganization.value % "scala-library" % scalaVersion.value,
-      scalaOrganization.value % "scala-reflect" % scalaVersion.value,
-      scalaOrganization.value % "scalap" % scalaVersion.value
+      scalaOrganization.value % "scala-library"  % scalaVersion.value,
+      scalaOrganization.value % "scala-reflect"  % scalaVersion.value,
+      scalaOrganization.value % "scalap"         % scalaVersion.value
     ) ++ logback
-  ) ++ inConfig(Test)(sensibleTestSettings) ++ inConfig(Compile)(sensibleCrossPath)
+  ) ++ inConfig(Test)(sensibleTestSettings) ++ inConfig(Compile)(
+    sensibleCrossPath
+  )
 
 }
 
 object SensibleSettings {
   def shapeless = Def.setting {
-    val plugins = CrossVersion.partialVersion(scalaVersion.value).collect {
-      case (2, 10) => compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
-    }.toList
+    val plugins = CrossVersion
+      .partialVersion(scalaVersion.value)
+      .collect {
+        case (2, 10) =>
+          compilerPlugin(
+            "org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch
+          )
+      }
+      .toList
 
     "com.chuusai" %% "shapeless" % "2.3.2" :: plugins
   }
 
-  def sensibleTestLibs(config: Configuration) = Seq(
-    // janino 3.0.6 is not compatible and causes http://www.slf4j.org/codes.html#replay
-    "org.codehaus.janino" % "janino" % "2.7.8" % config,
-    "org.scalatest" %% "scalatest" % "3.0.4" % config
-  ) ++ logback.map(_ % config)
+  def sensibleTestLibs(config: Configuration) =
+    Seq(
+      // janino 3.0.6 is not compatible and causes http://www.slf4j.org/codes.html#replay
+      "org.codehaus.janino" % "janino" % "2.7.8" % config,
+      "org.scalatest"       %% "scalatest" % "3.0.4" % config
+    ) ++ logback.map(_      % config)
 
   // WORKAROUND https://github.com/sbt/sbt/issues/2534
   // don't forget to also call testLibs
   def sensibleTestSettings = sensibleCrossPath ++ Seq(
     parallelExecution := true,
-
     scalacOptions in console ~= { opts =>
-      opts.filterNot { flag => flag.startsWith("-Ywarn") || flag.startsWith("-Xlint") }
+      opts.filterNot { flag =>
+        flag.startsWith("-Ywarn") || flag.startsWith("-Xlint")
+      }
     },
-
     javaOptions ~= (_.filterNot(_.startsWith("-Dlogback.configurationFile"))),
     javaOptions += s"-Dlogback.configurationFile=${(baseDirectory in ThisBuild).value}/logback-${configuration.value}.xml",
-
     testForkedParallel := true,
     testGrouping := {
       val opts = ForkOptions(
@@ -233,15 +240,14 @@ object SensibleSettings {
         Tests.Group(test.name, Seq(test), Tests.SubProcess(opts))
       }
     },
-
     javaOptions ++= {
       if (sys.env.get("GC_LOGGING").isEmpty) Nil
       else {
-        val base = (baseDirectory in ThisBuild).value
+        val base   = (baseDirectory in ThisBuild).value
         val config = configuration.value
-        val n = name.value
-        val count = forkCount.incrementAndGet() // subject to task evaluation
-        val out = { base / s"gc-$config-$n.log" }.getCanonicalPath
+        val n      = name.value
+        val count  = forkCount.incrementAndGet() // subject to task evaluation
+        val out    = { base / s"gc-$config-$n.log" }.getCanonicalPath
         Seq(
           // https://github.com/fommil/lions-share
           s"-Xloggc:$out",
@@ -252,19 +258,22 @@ object SensibleSettings {
         )
       }
     },
-
     // and don't forget `export SCALACTIC_FILE_PATHNAMES=true`
-    testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oF", "-W", "120", "60"),
+    testOptions += Tests.Argument(TestFrameworks.ScalaTest,
+                                  "-oF",
+                                  "-W",
+                                  "120",
+                                  "60"),
     testFrameworks := Seq(TestFrameworks.ScalaTest, TestFrameworks.JUnit)
   )
 
   private val slf4jVersion = "1.7.25"
   val logback = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "org.slf4j" % "slf4j-api" % slf4jVersion,
-    "org.slf4j" % "jul-to-slf4j" % slf4jVersion,
-    "org.slf4j" % "jcl-over-slf4j" % slf4jVersion,
-    "org.slf4j" % "log4j-over-slf4j" % slf4jVersion
+    "ch.qos.logback" % "logback-classic"  % "1.2.3",
+    "org.slf4j"      % "slf4j-api"        % slf4jVersion,
+    "org.slf4j"      % "jul-to-slf4j"     % slf4jVersion,
+    "org.slf4j"      % "jcl-over-slf4j"   % slf4jVersion,
+    "org.slf4j"      % "log4j-over-slf4j" % slf4jVersion
   )
 
   // used for unique gclog naming
@@ -273,7 +282,7 @@ object SensibleSettings {
   // WORKAROUND https://github.com/sbt/sbt/issues/2819
   private[fommil] def sensibleCrossPath = Seq(
     unmanagedSourceDirectories += {
-      val dir = scalaSource.value
+      val dir                  = scalaSource.value
       val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
       file(s"${dir.getPath}-$major.$minor")
     }

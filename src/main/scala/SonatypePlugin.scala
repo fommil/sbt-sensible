@@ -34,7 +34,7 @@ import sbt.Keys._
  */
 object SonatypePlugin extends AutoPlugin {
   override def requires = xerial.sbt.Sonatype // to override publishTo
-  override def trigger = allRequirements
+  override def trigger  = allRequirements
 
   val autoImport = SonatypeKeys
   import autoImport._
@@ -49,12 +49,20 @@ object SonatypePlugin extends AutoPlugin {
   override lazy val projectSettings = Seq(
     PgpKeys.useGpgAgent := true,
     headers := {
-      assert(licenses.value.nonEmpty, "licenses cannot be empty or maven central will reject publication")
+      assert(
+        licenses.value.nonEmpty,
+        "licenses cannot be empty or maven central will reject publication"
+      )
       val (org, repo) = sonatypeGithub.value
-      val start = startYear.value.map { y => s"$y - " }.getOrElse("")
-      val copyrightBlurb = s"// Copyright: $start$year https://github.com/$org/$repo/graphs"
+      val start = startYear.value.map { y =>
+        s"$y - "
+      }.getOrElse("")
+      val copyrightBlurb =
+        s"// Copyright: $start$year https://github.com/$org/$repo/graphs"
       // doesn't support multiple licenses
-      val licenseBlurb = licenses.value.map { case (name, url) => s"// License: $url" }.head
+      val licenseBlurb = licenses.value.map {
+        case (name, url) => s"// License: $url"
+      }.head
       val header = (
         "(?s)(// Copyright[^\\n]*[\\n]// Licen[cs]e[^\\n]*[\\n])(.*)".r,
         s"$copyrightBlurb\n$licenseBlurb\n"
@@ -62,9 +70,16 @@ object SonatypePlugin extends AutoPlugin {
       Map("scala" -> header, "java" -> header)
     },
     publishArtifact in Test := false,
-    homepage := Some(url(s"http://github.com/${sonatypeGithub.value._1}/${sonatypeGithub.value._2}")),
+    homepage := Some(
+      url(
+        s"http://github.com/${sonatypeGithub.value._1}/${sonatypeGithub.value._2}"
+      )
+    ),
     publishTo := {
-      assert(licenses.value.nonEmpty, "licenses cannot be empty or maven central will reject publication")
+      assert(
+        licenses.value.nonEmpty,
+        "licenses cannot be empty or maven central will reject publication"
+      )
       val nexus = "https://oss.sonatype.org/"
       if (isSnapshot.value)
         Some("snapshots" at nexus + "content/repositories/snapshots")
@@ -78,7 +93,11 @@ object SonatypePlugin extends AutoPlugin {
         for {
           username <- sys.env.get("SONATYPE_USERNAME")
           password <- sys.env.get("SONATYPE_PASSWORD")
-        } yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)
+        } yield
+          Credentials("Sonatype Nexus Repository Manager",
+                      "oss.sonatype.org",
+                      username,
+                      password)
       }.toSeq
     },
     pomExtra := (
@@ -116,8 +135,12 @@ object SonatypeKeys {
    * http://fommil.github.io/scalasphere16/
    */
   val GPL3 = ("GPL 3.0" -> url("http://www.gnu.org/licenses/gpl-3.0.en.html"))
-  val LGPL3 = ("LGPL 3.0" -> url("http://www.gnu.org/licenses/lgpl-3.0.en.html"))
+  val LGPL3 = ("LGPL 3.0" -> url(
+    "http://www.gnu.org/licenses/lgpl-3.0.en.html"
+  ))
   val MPL2 = ("MPL 2.0" -> "https://www.mozilla.org/en-US/MPL/2.0/")
-  val Apache2 = ("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+  val Apache2 = ("Apache-2.0" -> url(
+    "http://www.apache.org/licenses/LICENSE-2.0"
+  ))
 
 }
