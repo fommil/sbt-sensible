@@ -12,7 +12,7 @@ import sbt.Keys._
 
 /**
  * Zero magic support for publishing to sonatype, assuming the project
- * is published on github.
+ * is published on github or gitlab.
  *
  * If the version string contains "SNAPSHOT", it goes to snapshots,
  * otherwise to staging.
@@ -53,12 +53,12 @@ object SonatypePlugin extends AutoPlugin {
         licenses.value.nonEmpty,
         "licenses cannot be empty or maven central will reject publication"
       )
-      val (org, repo) = sonatypeGithub.value
+      val (host, org, repo) = sonatypeGithost.value
       val start = startYear.value.map { y =>
         s"$y - "
       }.getOrElse("")
       val copyrightBlurb =
-        s"// Copyright: $start$year https://github.com/$org/$repo/graphs"
+        s"// Copyright: $start$year https://$host/$org/$repo/graphs"
       // doesn't support multiple licenses
       val licenseBlurb = licenses.value.map {
         case (name, url) => s"// License: $url"
@@ -70,11 +70,10 @@ object SonatypePlugin extends AutoPlugin {
       Map("scala" -> header, "java" -> header)
     },
     publishArtifact in Test := false,
-    homepage := Some(
-      url(
-        s"http://github.com/${sonatypeGithub.value._1}/${sonatypeGithub.value._2}"
-      )
-    ),
+    homepage := {
+      val (host, org, repo) = sonatypeGithost.value
+      Some(url(s"http://$host/$org/$repo"))
+    },
     publishTo := {
       assert(
         licenses.value.nonEmpty,
@@ -100,24 +99,26 @@ object SonatypePlugin extends AutoPlugin {
                       password)
       }.toSeq
     },
-    pomExtra := (
+    pomExtra := {
+      val (host, org, repo) = sonatypeGithost.value
+
       <scm>
-        <url>git@github.com:{ sonatypeGithub.value._1 }/{ sonatypeGithub.value._2 }.git</url>
-        <connection>scm:git:git@github.com:{ sonatypeGithub.value._1 }/{ sonatypeGithub.value._2 }.git</connection>
+        <url>git@{ host }:{ org }/{ repo }.git</url>
+        <connection>scm:git:git@{ host }:{ org }/{ repo }.git</connection>
       </scm>
       <developers>
         <developer>
-          <id>{ sonatypeGithub.value._1 }</id>
+          <id>{ org }</id>
         </developer>
       </developers>
-    )
+    }
   )
 }
 
 object SonatypeKeys {
 
-  val sonatypeGithub = settingKey[(String, String)](
-    "The (user, repository) that hosts the project on github.com/user/repository"
+  val sonatypeGithost = settingKey[(String, String, String)](
+    "The (host, user, repository) that hosts the project on githost/user/repository"
   )
 
   /*
