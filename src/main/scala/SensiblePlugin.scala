@@ -8,13 +8,12 @@ import scala.util.Properties
 
 import sbtdynver.DynVerPlugin.autoImport._
 import sbt._
-import sbt.IO._
 import sbt.Keys._
 
 /**
  * A bunch of sensible sbt defaults used by https://github.com/fommil
  */
-object SensiblePlugin extends AutoPlugin {
+object SensiblePlugin extends AutoPlugin with BackCompat {
   override def requires = sbtdynver.DynVerPlugin
   override def trigger  = allRequirements
 
@@ -147,36 +146,36 @@ object SensiblePlugin extends AutoPlugin {
       else
         Seq(
           // we don't want another https://issues.apache.org/jira/browse/CASSANDRA-10984
-          SbtExclusionRule("io.netty", "netty-all"),
+          ExclusionRule("io.netty", "netty-all"),
           // clean up the mess made by everybody who doesn't use slf4j...
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.10"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-liquibase"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-jul"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-iostreams"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-nosql"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-bom"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-osgi"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.11"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-jmx-gui"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-taglib"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-web"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-flume-ng"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-jcl"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-to-slf4j"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-1.2-api"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-core-its"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-core"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j-api"),
-          SbtExclusionRule("org.apache.logging.log4j", "log4j"),
-          SbtExclusionRule("log4j", "apache-log4j-extras"),
-          SbtExclusionRule("log4j", "log4j"),
-          SbtExclusionRule("commons-logging", "commons-logging"),
-          SbtExclusionRule("commons-logging", "commons-logging-api"),
-          SbtExclusionRule("commons-logging", "commons-logging-adapters"),
-          SbtExclusionRule("org.slf4j", "slf4j-log4j12"),
-          SbtExclusionRule("org.slf4j", "slf4j-jdk14"),
-          SbtExclusionRule("org.slf4j", "slf4j-jcl.jar")
+          ExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.10"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-liquibase"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-jul"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-iostreams"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-nosql"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-bom"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-osgi"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-api-scala_2.11"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-jmx-gui"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-taglib"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-web"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-flume-ng"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-jcl"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-to-slf4j"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-1.2-api"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-core-its"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-core"),
+          ExclusionRule("org.apache.logging.log4j", "log4j-api"),
+          ExclusionRule("org.apache.logging.log4j", "log4j"),
+          ExclusionRule("log4j", "apache-log4j-extras"),
+          ExclusionRule("log4j", "log4j"),
+          ExclusionRule("commons-logging", "commons-logging"),
+          ExclusionRule("commons-logging", "commons-logging-api"),
+          ExclusionRule("commons-logging", "commons-logging-adapters"),
+          ExclusionRule("org.slf4j", "slf4j-log4j12"),
+          ExclusionRule("org.slf4j", "slf4j-jdk14"),
+          ExclusionRule("org.slf4j", "slf4j-jcl.jar")
         )
     },
     dependencyOverrides ++= Set(
@@ -185,7 +184,7 @@ object SensiblePlugin extends AutoPlugin {
       scalaOrganization.value % "scala-library"  % scalaVersion.value,
       scalaOrganization.value % "scala-reflect"  % scalaVersion.value,
       scalaOrganization.value % "scalap"         % scalaVersion.value
-    ) ++ logback
+    ).compat ++ logback
   ) ++ inConfig(Test)(sensibleTestSettings) ++ inConfig(Compile)(
     sensibleCrossPath
   )
@@ -228,12 +227,12 @@ object SensibleSettings {
     testForkedParallel := true,
     testGrouping := {
       val opts = ForkOptions(
-        bootJars = Nil,
         javaHome = javaHome.value,
-        connectInput = connectInput.value,
         outputStrategy = outputStrategy.value,
-        runJVMOptions = javaOptions.value,
-        workingDirectory = Some(baseDirectory.value),
+        bootJars = Vector.empty[File],
+        workingDirectory = Option(baseDirectory.value),
+        runJVMOptions = javaOptions.value.toVector,
+        connectInput = connectInput.value,
         envVars = envVars.value
       )
       definedTests.value.map { test =>

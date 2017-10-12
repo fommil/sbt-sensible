@@ -19,7 +19,7 @@ build_job:
         echo "Please remove TODO or FIXME." ;
         exit 1 ;
       fi
-    - sbt ";+update ;scalafmt::test ;compile ;doc";
+    - sbt ";^update ;^scalafmt::test ;^compile ;^doc";
       if $(! git diff --exit-code --quiet) ; then
         echo "Copyright header information mismatch" ;
         git --no-pager diff ;
@@ -32,7 +32,7 @@ test_job:
     - master
     - /^feature.*$/
   script:
-    - sbt scripted
+    - sbt ^scripted
 
 deploy_job:
   only:
@@ -41,4 +41,4 @@ deploy_job:
     - tags
   stage: deploy
   script:
-    - sbt publish
+    - sbt ^publish
