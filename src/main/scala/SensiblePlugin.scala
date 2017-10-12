@@ -37,7 +37,7 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
       val isSnapshot = dynverGitDescribeOutput.value.isSnapshot
       if (!isSnapshot) dyn
       else {
-        val SemVer = "(\\d+)[.](\\d+)[.](\\d+)".r
+        val SemVer = "(\\d+)[.](\\d+)[.](\\d+)(-[MR].*)?".r // accounts for M1 / RC
         val NewVer = "(\\d+)[.](\\d+)[.](\\d+)-alpha0".r
         dyn.replaceAll("[+].*", "") match {
           case NewVer(major, minor, patch) => s"$major.$minor.$patch-SNAPSHOT"
