@@ -72,7 +72,11 @@ object SonatypePlugin extends AutoPlugin {
     publishArtifact in Test := false,
     homepage := {
       val (host, org, repo) = sonatypeGithost.value
-      Some(url(s"http://$host/$org/$repo"))
+      val landing = host match {
+        case Github => s"http://github.com/$org/$repo"
+        case Gitlab => s"http://gitlab.com/$org/$repo"
+      }
+      Some(url(landing))
     },
     publishTo := {
       assert(
@@ -101,10 +105,14 @@ object SonatypePlugin extends AutoPlugin {
     },
     pomExtra := {
       val (host, org, repo) = sonatypeGithost.value
+      val connection = host match {
+        case Github => s"scm:git:git@github.com:$org/$repo.git"
+        case Gitlab => s"scm:git:git@gitlab.com:$org/$repo.git"
+      }
 
       <scm>
-        <url>git@{ host }:{ org }/{ repo }.git</url>
-        <connection>scm:git:git@{ host }:{ org }/{ repo }.git</connection>
+        <url> { homepage.value } </url>
+        <connection>{ connection }</connection>
       </scm>
       <developers>
         <developer>
@@ -116,8 +124,11 @@ object SonatypePlugin extends AutoPlugin {
 }
 
 object SonatypeKeys {
+  sealed trait Githost
+  case object Github extends Githost
+  case object Gitlab extends Githost
 
-  val sonatypeGithost = settingKey[(String, String, String)](
+  val sonatypeGithost = settingKey[(Githost, String, String)](
     "The (host, user, repository) that hosts the project on githost/user/repository"
   )
 
