@@ -18,10 +18,11 @@ def addSbtPlugin1(dependency: ModuleID): Setting[Seq[ModuleID]] =
 sonatypeGithub := ("fommil", "sbt-sensible")
 licenses := Seq(Apache2)
 
-addSbtPlugin1("io.get-coursier" % "sbt-coursier" % "1.0.0-RC12")
-addSbtPlugin1("com.jsuereth"    % "sbt-pgp"      % "1.1.0")
-addSbtPlugin1("com.dwijnand"    % "sbt-dynver"   % "2.0.0")
-addSbtPlugin1("org.xerial.sbt"  % "sbt-sonatype" % "2.0")
+addSbtPlugin1("io.get-coursier"   % "sbt-coursier" % "1.0.0-RC12")
+addSbtPlugin1("com.jsuereth"      % "sbt-pgp"      % "1.1.0")
+addSbtPlugin1("com.dwijnand"      % "sbt-dynver"   % "2.0.0")
+addSbtPlugin1("org.xerial.sbt"    % "sbt-sonatype" % "2.0")
+addSbtPlugin1("de.heikoseeberger" % "sbt-header"   % "3.0.2")
 
 scalafmtOnCompile in ThisBuild := true
 scalafmtConfig in ThisBuild := file("project/scalafmt.conf")
