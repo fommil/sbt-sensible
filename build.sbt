@@ -15,7 +15,7 @@ def addSbtPlugin1(dependency: ModuleID): Setting[Seq[ModuleID]] =
 
 // use a local.sbt with the `sbtVersion in Global` set appropriately
 
-sonatypeGithub := ("fommil", "sbt-sensible")
+sonatypeGithost := ("gitlab.com", "fommil", "sbt-sensible")
 licenses := Seq(Apache2)
 
 addSbtPlugin1("io.get-coursier"   % "sbt-coursier" % "1.0.0-RC12")
