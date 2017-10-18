@@ -39,8 +39,11 @@ object SonatypePlugin extends AutoPlugin {
 
   private val year = Calendar.getInstance.get(Calendar.YEAR)
 
+  override lazy val buildSettings = Seq(
+    sonatypeDevelopers := Nil
+  )
+
   override lazy val projectSettings = Seq(
-    sonatypeDevelopers := Nil,
     PgpKeys.useGpgAgent := true,
     // headerMappings := Map(
     //   HeaderFileType.scala -> SensibleLineComment,
