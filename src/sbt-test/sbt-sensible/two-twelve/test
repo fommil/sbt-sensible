@@ -1,1 +1,11 @@
 > updateClassifiers
+
+# needs scalafmt
+#-> scalafmt::test
+#> compile
+# auto format on compile
+#> scalafmt::test
+
+-> headerCheck
+> headerCreate
+> headerCheck

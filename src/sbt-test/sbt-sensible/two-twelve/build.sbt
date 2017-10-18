@@ -1,4 +1,4 @@
 scalaVersion in ThisBuild := "2.12.3"
 
-sonatypeGithost := ("gitlab.com", "fommil", "sbt-sensible")
+sonatypeGithost := (Gitlab, "fommil", "sbt-sensible")
 licenses := Seq(Apache2)

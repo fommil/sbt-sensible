@@ -4,9 +4,9 @@ package fommil
 
 import java.util.Calendar
 
-import scala.util.matching.Regex
-
 import com.typesafe.sbt.pgp.PgpKeys
+import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport._
+
 import sbt._
 import sbt.Keys._
 
@@ -28,9 +28,7 @@ import sbt.Keys._
  * Staged releases should be followed by `sonatypeRelease`.
  *
  * Note that this will automatically set the sbt-header settings to
- * sensible defaults if it is enabled. We do not enable it
- * automatically because it requires Java 7
- * https://github.com/sbt/sbt-header/issues/31 so users must opt-in.
+ * sensible defaults and align everything with the sonatype data.
  */
 object SonatypePlugin extends AutoPlugin {
   override def requires = xerial.sbt.Sonatype // to override publishTo
@@ -39,16 +37,20 @@ object SonatypePlugin extends AutoPlugin {
   val autoImport = SonatypeKeys
   import autoImport._
 
-  // exploiting single namespaces to set sensible defaults for sbt-header (if enabled)
-  private val headers = settingKey[Map[String, (Regex, String)]](
-    "Header pattern and text by extension; empty by default"
-  )
-
   private val year = Calendar.getInstance.get(Calendar.YEAR)
 
   override lazy val projectSettings = Seq(
+    sonatypeDevelopers := Nil,
     PgpKeys.useGpgAgent := true,
-    headers := {
+    // headerMappings := Map(
+    //   HeaderFileType.scala -> SensibleLineComment,
+    //   HeaderFileType.java  -> SensibleLineComment
+    // ),
+    // BUG: https://github.com/sbt/sbt-header/issues/139 requires a blank line after
+    headerMappings := headerMappings.value +
+      (HeaderFileType.scala -> HeaderCommentStyle.CppStyleLineComment) +
+      (HeaderFileType.java  -> HeaderCommentStyle.CppStyleLineComment),
+    headerLicense := {
       assert(
         licenses.value.nonEmpty,
         "licenses cannot be empty or maven central will reject publication"
@@ -58,21 +60,28 @@ object SonatypePlugin extends AutoPlugin {
         s"$y - "
       }.getOrElse("")
       val copyrightBlurb =
-        s"// Copyright: $start$year https://$host/$org/$repo/graphs"
+        (host, sonatypeDevelopers.value) match {
+          case (_, named) if named.nonEmpty =>
+            s"Copyright: $start$year ${named.mkString(", ")}"
+          case (Github, _) =>
+            s"Copyright: $start$year https://github.com/$org/$repo/graphs/contributors"
+          case (Gitlab, _) =>
+            s"Copyright: $start$year https://gitlab.com/$org/$repo/graphs/master"
+        }
       // doesn't support multiple licenses
       val licenseBlurb = licenses.value.map {
-        case (name, url) => s"// License: $url"
+        case (name, url) => s"License: $url"
       }.head
-      val header = (
-        "(?s)(// Copyright[^\\n]*[\\n]// Licen[cs]e[^\\n]*[\\n])(.*)".r,
-        s"$copyrightBlurb\n$licenseBlurb\n"
-      )
-      Map("scala" -> header, "java" -> header)
+      Some(HeaderLicense.Custom(s"$copyrightBlurb\n$licenseBlurb"))
     },
     publishArtifact in Test := false,
     homepage := {
       val (host, org, repo) = sonatypeGithost.value
-      Some(url(s"http://$host/$org/$repo"))
+      val landing = host match {
+        case Github => s"http://github.com/$org/$repo"
+        case Gitlab => s"http://gitlab.com/$org/$repo"
+      }
+      Some(url(landing))
     },
     publishTo := {
       assert(
@@ -101,14 +110,26 @@ object SonatypePlugin extends AutoPlugin {
     },
     pomExtra := {
       val (host, org, repo) = sonatypeGithost.value
+      val connection = host match {
+        case Github => s"scm:git:git@github.com:$org/$repo.git"
+        case Gitlab => s"scm:git:git@gitlab.com:$org/$repo.git"
+      }
+
+      val devs = sonatypeDevelopers.value match {
+        case Nil => <id>{ org }</id>
+        case named =>
+          named.map { name =>
+            <id> { name } </id>
+          }
+      }
 
       <scm>
-        <url>git@{ host }:{ org }/{ repo }.git</url>
-        <connection>scm:git:git@{ host }:{ org }/{ repo }.git</connection>
+        <url> { homepage.value } </url>
+        <connection>{ connection }</connection>
       </scm>
       <developers>
         <developer>
-          <id>{ org }</id>
+          { devs }
         </developer>
       </developers>
     }
@@ -116,9 +137,16 @@ object SonatypePlugin extends AutoPlugin {
 }
 
 object SonatypeKeys {
+  sealed trait Githost
+  case object Github extends Githost
+  case object Gitlab extends Githost
 
-  val sonatypeGithost = settingKey[(String, String, String)](
-    "The (host, user, repository) that hosts the project on githost/user/repository"
+  val sonatypeGithost = settingKey[(Githost, String, String)](
+    "The (host, user, repository) that hosts the project at user/repository"
+  )
+
+  val sonatypeDevelopers = settingKey[List[String]](
+    "Copyright owners, if non-empty will affect headers and POM file."
   )
 
   /*
@@ -143,5 +171,13 @@ object SonatypeKeys {
   val Apache2 = ("Apache-2.0" -> url(
     "http://www.apache.org/licenses/LICENSE-2.0"
   ))
+
+  // https://github.com/sbt/sbt-header/issues/137
+  // doesn't aggressively nuke anything below the copyright / license line
+  // case object SensibleLineComment extends CommentStyle {
+  //   override val commentCreator = new LineCommentCreator("//")
+  //   override val pattern: Regex =
+  //     "(?s)(// Copyright[^\\n]*[\\n]// Licen[cs]e[^\\n]*[\\n])(.*)".r
+  // }
 
 }
