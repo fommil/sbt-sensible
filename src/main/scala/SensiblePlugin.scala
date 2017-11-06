@@ -21,7 +21,7 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
   import autoImport._
 
   private val JavaSpecificFlags =
-    sys.props("java.version").substring(0, 3) match {
+    sys.props("java.version").take(3) match {
       case "1.6" | "1.7" => List("-XX:MaxPermSize=256m")
       case _             => List("-XX:MaxMetaspaceSize=256m")
     }
