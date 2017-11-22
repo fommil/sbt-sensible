@@ -1,5 +1,6 @@
-// Copyright: 2017 Sam Halliday
-// License: http://www.gnu.org/licenses/gpl.html
+// Copyright: 2015 - 2017 https://gitlab.com/fommil/sbt-sensible/graphs/master
+// License: http://www.apache.org/licenses/LICENSE-2.0
+
 package fommil
 
 import scala.collection.immutable.Set

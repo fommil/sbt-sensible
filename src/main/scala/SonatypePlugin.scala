@@ -1,5 +1,6 @@
-// Copyright 2015 - 2016 Sam Halliday
+// Copyright: 2015 - 2017 https://gitlab.com/fommil/sbt-sensible/graphs/master
 // License: http://www.apache.org/licenses/LICENSE-2.0
+
 package fommil
 
 import java.util.Calendar
