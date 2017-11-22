@@ -7,6 +7,7 @@ import java.util.Calendar
 
 import com.typesafe.sbt.pgp.PgpKeys
 import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport._
+import de.heikoseeberger.sbtheader._
 
 import sbt._
 import sbt.Keys._
@@ -46,14 +47,13 @@ object SonatypePlugin extends AutoPlugin {
 
   override lazy val projectSettings = Seq(
     PgpKeys.useGpgAgent := true,
-    // headerMappings := Map(
-    //   HeaderFileType.scala -> SensibleLineComment,
-    //   HeaderFileType.java  -> SensibleLineComment
-    // ),
-    // BUG: https://github.com/sbt/sbt-header/issues/139 requires a blank line after
     headerMappings := headerMappings.value +
-      (HeaderFileType.scala -> HeaderCommentStyle.CppStyleLineComment) +
-      (HeaderFileType.java  -> HeaderCommentStyle.CppStyleLineComment),
+      (HeaderFileType.scala -> CommentStyle.cppStyleLineComment) +
+      (HeaderFileType.java  -> CommentStyle.cppStyleLineComment),
+//  https://github.com/sbt/sbt-header/issues/139
+//    headerMappings := headerMappings.value +
+//      (HeaderFileType.scala -> SensibleLineComment) +
+//      (HeaderFileType.java  -> SensibleLineComment),
     headerLicense := {
       assert(
         licenses.value.nonEmpty,
@@ -176,12 +176,9 @@ object SonatypeKeys {
     "http://www.apache.org/licenses/LICENSE-2.0"
   ))
 
-  // https://github.com/sbt/sbt-header/issues/137
-  // doesn't aggressively nuke anything below the copyright / license line
-  // case object SensibleLineComment extends CommentStyle {
-  //   override val commentCreator = new LineCommentCreator("//")
-  //   override val pattern: Regex =
-  //     "(?s)(// Copyright[^\\n]*[\\n]// Licen[cs]e[^\\n]*[\\n])(.*)".r
-  // }
+  val SensibleLineComment = CommentStyle(
+    new LineCommentCreator("//"),
+    "(?s)(// Copyright[^\\n]*[\\n]// Licen[cs]e[^\\n]*[\\n])(.*)".r
+  )
 
 }
