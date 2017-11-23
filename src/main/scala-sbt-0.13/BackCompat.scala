@@ -12,4 +12,8 @@ trait BackCompat {
   implicit class BackCompatDepOverrides[A](val deps: Set[A]) {
     def compat: Set[A] = deps
   }
+
+  implicit class BackCompatForkRun(val result: Option[String]) {
+    def dealWithIt(): Unit = result.foreach(sys.error)
+  }
 }
