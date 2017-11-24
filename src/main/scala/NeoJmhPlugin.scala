@@ -40,6 +40,8 @@ object NeoJmhPlugin extends AutoPlugin with BackCompat {
       )
     ) ++ inConfig(JmhInternal)(
       Defaults.testSettings ++ Seq(
+        javaOptions := (javaOptions in Jmh).value,
+        envVars := (envVars in Jmh).value,
         mainClass in run := Some("org.openjdk.jmh.Main"),
         fork in run := true,
         dependencyClasspath ++= (fullClasspath in Jmh).value,
