@@ -76,6 +76,7 @@ object NeoJmhPlugin extends AutoPlugin with BackCompat {
     val workingDirectory = Option((baseDirectory in Jmh).value)
     val connectInputV    = (connectInput in Jmh).value
     val envVarsV         = (envVars in Jmh).value
+    val javaFlags        = (javaOptions in Jmh).value.toVector
 
     val inputs: Set[File] = (bytecodeDir ** "*").filter(_.isFile).get.toSet
     val cachedGeneration = FileFunction.cached(cacheDir, FilesInfo.hash) { _ =>
@@ -89,7 +90,7 @@ object NeoJmhPlugin extends AutoPlugin with BackCompat {
         outputStrategy = outputStrategyV,
         bootJars = Vector.empty[java.io.File],
         workingDirectory = workingDirectory,
-        runJVMOptions = Vector.empty[String],
+        runJVMOptions = javaFlags,
         connectInput = connectInputV,
         envVars = envVarsV
       )

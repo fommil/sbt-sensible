@@ -59,7 +59,8 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
 
   override val projectSettings = Seq(
     ivyLoggingLevel := UpdateLogging.Quiet,
-    conflictManager := ConflictManager.strict,
+    // BLOCKED: https://github.com/coursier/coursier/issues/349
+    // conflictManager := ConflictManager.strict,
     // makes it really easy to use a RAM disk
     target := {
       sys.env.get("SBT_VOLATILE_TARGET") match {
