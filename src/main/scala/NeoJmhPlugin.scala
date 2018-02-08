@@ -1,4 +1,4 @@
-// Copyright: 2015 - 2017 https://gitlab.com/fommil/sbt-sensible/graphs/master
+// Copyright: 2015 - 2018 https://gitlab.com/fommil/sbt-sensible/graphs/master
 // License: http://www.apache.org/licenses/LICENSE-2.0
 
 package fommil
@@ -59,7 +59,7 @@ object NeoJmhPlugin extends AutoPlugin with BackCompat {
         "jmh-generator-bytecode",
         "jmh-generator-reflection",
         "jmh-generator-asm"
-      ).map("org.openjdk.jmh" % _ % "1.19" % Jmh.name)
+      ).map("org.openjdk.jmh" % _ % "1.20" % Jmh.name)
     )
 
   def generateBenchmarkSourcesAndResources

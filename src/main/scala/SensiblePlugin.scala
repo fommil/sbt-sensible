@@ -1,4 +1,4 @@
-// Copyright: 2015 - 2017 https://gitlab.com/fommil/sbt-sensible/graphs/master
+// Copyright: 2015 - 2018 https://gitlab.com/fommil/sbt-sensible/graphs/master
 // License: http://www.apache.org/licenses/LICENSE-2.0
 
 package fommil
@@ -139,8 +139,6 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
     javacOptions in doc ~= (_.filterNot(_.startsWith("-Xlint"))),
     javacOptions in doc ~= (_.filterNot(_.startsWith("-Werror"))),
     javaOptions ++= JavaSpecificFlags ++ Seq("-Xss2m", "-Dfile.encoding=UTF8"),
-    // must be project-level because of crazy ivy...
-    libraryDependencies ++= sensibleTestLibs(Test),
     excludeDependencies ++= {
       // plugins tend to have an intricate network of dependencies...
       if (sbtPlugin.value) Nil
@@ -193,27 +191,6 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
 }
 
 object SensibleSettings {
-  def shapeless = Def.setting {
-    val plugins = CrossVersion
-      .partialVersion(scalaVersion.value)
-      .collect {
-        case (2, 10) =>
-          compilerPlugin(
-            "org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch
-          )
-      }
-      .toList
-
-    "com.chuusai" %% "shapeless" % "2.3.2" :: plugins
-  }
-
-  def sensibleTestLibs(config: Configuration) =
-    Seq(
-      // janino 3.0.6 is not compatible and causes http://www.slf4j.org/codes.html#replay
-      "org.codehaus.janino" % "janino" % "2.7.8" % config,
-      "org.scalatest"       %% "scalatest" % "3.0.4" % config
-    ) ++ logback.map(_      % config)
-
   // WORKAROUND https://github.com/sbt/sbt/issues/2534
   // don't forget to also call testLibs
   def sensibleTestSettings = sensibleCrossPath ++ Seq(
