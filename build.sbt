@@ -11,11 +11,11 @@ crossSbtVersions := Seq("1.1.1", "0.13.17")
 sonatypeGithost := (Gitlab, "fommil", "sbt-sensible")
 licenses := Seq(Apache2)
 
-addSbtPlugin("io.get-coursier"   % "sbt-coursier" % "1.0.0")
-addSbtPlugin("com.jsuereth"      % "sbt-pgp"      % "1.1.0")
+addSbtPlugin("io.get-coursier"   % "sbt-coursier" % "1.0.2")
+addSbtPlugin("com.jsuereth"      % "sbt-pgp"      % "1.1.1")
 addSbtPlugin("com.dwijnand"      % "sbt-dynver"   % "2.1.0")
-addSbtPlugin("org.xerial.sbt"    % "sbt-sonatype" % "2.0")
-addSbtPlugin("de.heikoseeberger" % "sbt-header"   % "4.1.0")
+addSbtPlugin("org.xerial.sbt"    % "sbt-sonatype" % "2.3")
+addSbtPlugin("de.heikoseeberger" % "sbt-header"   % "5.0.0")
 
 scalafmtConfig in ThisBuild := Some(file("project/scalafmt.conf"))
 
