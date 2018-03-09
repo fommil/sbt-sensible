@@ -50,7 +50,7 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
         }
       }
     },
-    isSnapshot := version.value.contains("SNAP"),
+    isSnapshot := version.value.contains("SNAP") || sys.env.get("CI").isDefined,
     concurrentRestrictions := {
       val limited = Properties.envOrElse("SBT_TASK_LIMIT", "4").toInt
       Seq(Tags.limitAll(limited))
