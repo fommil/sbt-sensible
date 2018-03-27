@@ -1,5 +1,5 @@
-// Copyright: 2015 - 2018 https://gitlab.com/fommil/sbt-sensible/graphs/master
-// License: http://www.apache.org/licenses/LICENSE-2.0
+// Copyright: 2015 - 2018 Sam Halliday
+// License: http://www.gnu.org/licenses/lgpl-3.0.en.html
 
 package fommil
 

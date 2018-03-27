@@ -6,10 +6,11 @@ startYear := Some(2015)
 name := "sbt-sensible"
 sbtPlugin := true
 
-crossSbtVersions := Seq("1.1.1", "0.13.17")
+crossSbtVersions := Seq(sbtVersion.value, "0.13.17")
 
-sonatypeGithost := (Gitlab, "fommil", "sbt-sensible")
-licenses := Seq(Apache2)
+sonatypeGithost := (Gitlab, "fommil", name.value)
+licenses := Seq(LGPL3)
+sonatypeDevelopers := List("Sam Halliday")
 
 addSbtPlugin("io.get-coursier"   % "sbt-coursier" % "1.0.3")
 addSbtPlugin("com.jsuereth"      % "sbt-pgp"      % "1.1.1")
