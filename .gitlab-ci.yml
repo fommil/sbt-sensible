@@ -1,7 +1,4 @@
 image: fommil/docker-openjdk-sbt:latest
-cache:
-  paths:
-    - project/.sbt
 variables:
   COURSIER_CACHE: "project/.sbt/coursier"
 
@@ -11,6 +8,11 @@ stages:
 
 build_job:
   stage: build
+  cache:
+    key: default
+    paths:
+      - project/.sbt
+    policy: pull
   script:
     - if $(git grep -qE "TODO|FIXME" *) ; then
         echo "Please remove TODO or FIXME." ;
@@ -24,5 +26,9 @@ deploy_job:
   except:
     - tags
   stage: deploy
+  cache:
+    key: default
+    paths:
+      - project/.sbt
   script:
     - sbt ^publish
