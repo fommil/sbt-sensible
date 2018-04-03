@@ -58,6 +58,7 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
   )
 
   override val projectSettings = Seq(
+    sources in (Compile, doc) := Nil,
     ivyLoggingLevel := UpdateLogging.Quiet,
     // BLOCKED: https://github.com/coursier/coursier/issues/349
     // conflictManager := ConflictManager.strict,
@@ -191,6 +192,14 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
 }
 
 object SensibleSettings {
+  // WORKAROUND: https://github.com/sbt/sbt/issues/1965
+  def resourcesOnCompilerCp(config: Configuration): Seq[Setting[_]] =
+    Seq(managedClasspath in config := {
+      val res = (resourceDirectory in config).value
+      val old = (managedClasspath in config).value
+      Attributed.blank(res) +: old
+    })
+
   // WORKAROUND https://github.com/sbt/sbt/issues/2534
   // don't forget to also call testLibs
   def sensibleTestSettings = sensibleCrossPath ++ Seq(
