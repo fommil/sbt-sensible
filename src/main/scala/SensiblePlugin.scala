@@ -126,10 +126,12 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
       if (sys.env.contains("CI")) Seq("-Xfatal-warnings")
       else Nil
     },
-    scalacOptions in console in Compile ~= { opts =>
-      opts.filterNot { flag =>
-        flag.startsWith("-Ywarn") || flag.startsWith("-Xlint")
-      }
+    scalacOptions in (Compile, console) ~= { old =>
+      old.filterNot(
+        s =>
+          s.startsWith("-Xlint") || s.startsWith("-Werror") || s
+            .startsWith("-Ywarn")
+      )
     },
     javacOptions ++= Seq(
       "-Xlint:all",
@@ -192,7 +194,6 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
   ) ++ inConfig(Test)(sensibleTestSettings) ++ inConfig(Compile)(
     sensibleCrossPath
   )
-
 }
 
 object SensibleSettings {
