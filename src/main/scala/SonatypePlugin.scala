@@ -128,7 +128,7 @@ object SonatypePlugin extends AutoPlugin {
       }
 
       <scm>
-        <url> { homepage.value } </url>
+        <url> { homepage.value.get } </url>
         <connection>{ connection }</connection>
       </scm>
       <developers>
