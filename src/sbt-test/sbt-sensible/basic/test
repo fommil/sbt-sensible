@@ -1,5 +1,7 @@
 > updateClassifiers
 
+> +compile
+
 # needs scalafmt
 #-> scalafmt::test
 #> compile

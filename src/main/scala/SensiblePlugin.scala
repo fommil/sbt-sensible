@@ -106,7 +106,6 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
       "-Ywarn-inaccessible",
-      "-Ywarn-infer-any",
       "-Ywarn-nullary-override",
       "-Ywarn-nullary-unit",
       "-Ywarn-numeric-widen",
@@ -115,13 +114,23 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, 12)) =>
           Seq(
+            "-Ywarn-infer-any",
             "-Ywarn-extra-implicit",
             "-Xlint:-unused,_" // unused warnings must be explicitly added
           )
         case Some((2, 11)) =>
-          Seq("-Xlint", "-Yinline-warnings", "-Ywarn-unused-import")
-        case Some((2, 10)) => Seq("-Xlint", "-Yinline-warnings")
-        case _             => Nil
+          Seq(
+            "-Ywarn-infer-any",
+            "-Yinline-warnings",
+            "-Ywarn-unused-import",
+            "-Xlint"
+          )
+        case Some((2, 10)) =>
+          Seq(
+            "-Xlint",
+            "-Yinline-warnings"
+          )
+        case _ => Nil
       }
     } ++ {
       // fatal warnings can get in the way during the DEV cycle
