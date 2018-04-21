@@ -58,6 +58,7 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
   )
 
   override val projectSettings = Seq(
+    cleanClasses in Compile := IO.delete((classDirectory in Compile).value),
     sources in (Compile, doc) := Nil,
     ivyLoggingLevel := UpdateLogging.Quiet,
     // BLOCKED: https://github.com/coursier/coursier/issues/349
@@ -216,9 +217,13 @@ object SensibleSettings {
       Attributed.blank(res) +: old
     })
 
+  // https://github.com/scala/scala/pull/6256#issuecomment-366142058
+  val cleanClasses = taskKey[Unit]("clean the classes directory")
+
   // WORKAROUND https://github.com/sbt/sbt/issues/2534
   // don't forget to also call testLibs
   def sensibleTestSettings = sensibleCrossPath ++ Seq(
+    cleanClasses := IO.delete(classDirectory.value),
     parallelExecution := true,
     scalacOptions in console ~= { opts =>
       opts.filterNot { flag =>
