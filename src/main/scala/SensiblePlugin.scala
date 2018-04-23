@@ -60,11 +60,9 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
   override val projectSettings = Seq(
     cleanClasses in Compile := IO.delete((classDirectory in Compile).value),
     sources in (Compile, doc) := Nil,
-    publishArtifact in (Compile, packageDoc) := ! {
+    publishArtifact in (Compile, packageDoc) :=
       // https://issues.sonatype.org/browse/OSSRH-39300
-      (sys.env.get("SONATYPE_USERNAME") == Some("fommil")) &&
-      Set("com.fommil", "org.scalaz", "org.ensime")(organization.value)
-    },
+      !Set("com.fommil", "org.scalaz", "org.ensime")(organization.value),
     ivyLoggingLevel := UpdateLogging.Quiet,
     // BLOCKED: https://github.com/coursier/coursier/issues/349
     // conflictManager := ConflictManager.strict,
