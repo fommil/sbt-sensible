@@ -37,20 +37,9 @@ object SensiblePlugin extends AutoPlugin with BackCompat {
       val dyn        = dynverGitDescribeOutput.value.version(dynverCurrentDate.value)
       val isSnapshot = dynverGitDescribeOutput.value.isSnapshot
       if (!isSnapshot) dyn
-      else {
-        val NewVer = "(\\d+)[.](\\d+)[.](\\d+)-alpha0".r
-        val SemVer = "(\\d+)[.](\\d+)[.](\\d+)-?.*".r
-        dyn.replaceAll("[+].*", "") match {
-          case NewVer(major, minor, patch) =>
-            s"$major.$minor.$patch-SNAPSHOT"
-          case SemVer(major, minor, patch) =>
-            s"$major.$minor.${patch.toInt + 1}-SNAPSHOT"
-          case other =>
-            "0.0.1-SNAPSHOT"
-        }
-      }
+      else "SNAPSHOT"
     },
-    isSnapshot := version.value.contains("SNAP") || sys.env.get("CI").isDefined,
+    isSnapshot := version.value == "SNAPSHOT" || sys.env.get("CI").isDefined,
     concurrentRestrictions := {
       val limited = Properties.envOrElse("SBT_TASK_LIMIT", "4").toInt
       Seq(Tags.limitAll(limited))
